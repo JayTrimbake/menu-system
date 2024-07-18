@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-10">Admin Panel</h1>
+        <div class="flex flex-wrap justify-around">
+            <div class="w-full md:w-1/2 p-4">
+                <h2 class="text-2xl font-bold mb-4">Add New Category</h2>
+                <form action="/add-category" method="POST" class="space-y-4">
+                    <input type="text" name="name" placeholder="Category Name" required class="w-full p-2 border border-gray-300 rounded">
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Add Category</button>
+                </form>
+            </div>
+            <div class="w-full md:w-1/2 p-4">
+                <h2 class="text-2xl font-bold mb-4">Add New Product</h2>
+                <form action="/add-item" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <select name="category" required class="w-full p-2 border border-gray-300 rounded">
+                        <option value="">Select a Category</option>
+                    </select>
+                    <input type="text" name="itemName" placeholder="Product Name" required class="w-full p-2 border border-gray-300 rounded">
+                    <textarea name="itemDescription" placeholder="Product Description" required class="w-full p-2 border border-gray-300 rounded"></textarea>
+                    <input type="number" name="itemPrice" placeholder="Price" required class="w-full p-2 border border-gray-300 rounded">
+                    <input type="file" name="itemImage" required class="w-full p-2 border border-gray-300 rounded">
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add Product</button>
+                </form>
+            </div>
+            <!-- Products Display and Delete Section -->
+            <div class="w-full p-4">
+                <h2 class="text-2xl font-bold mb-4">Manage Products</h2>
+                <div id="product-list" class="space-y-2">
+                    <!-- Products will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.querySelector('form select[name="category"]');
+            const productList = document.getElementById('product-list');
+
+            // Fetch categories and populate the select dropdown
+            fetch('/categories')
+                .then(response => response.json())
+                .then(data => {
+                    data.categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.name;
+                        option.textContent = category.name;
+                        categorySelect.appendChild(option);
+
+                        // List products for management
+                        category.items.forEach(item => {
+                            const productDiv = document.createElement('div');
+                            productDiv.className = 'flex justify-between items-center bg-white p-2 shadow rounded';
+                            
+                            const productInfo = document.createElement('span');
+                            productInfo.textContent = `${item.name} - $${item.price}`;
+                            
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.textContent = 'Delete';
+                            deleteBtn.className = 'bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded';
+                            deleteBtn.onclick = () => {
+                                fetch(`/delete-item/${category.name}/${item.id}`, { method: 'DELETE' })
+                                    .then(response => response.json())
+                                    .then(result => {
+                                        console.log(result);
+                                        productDiv.remove(); // Remove the product element
+                                    })
+                                    .catch(error => console.error('Error deleting product:', error));
+                            };
+
+                            productDiv.appendChild(productInfo);
+                            productDiv.appendChild(deleteBtn);
+                            productList.appendChild(productDiv);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error fetching categories:', error));
+        });
+    </script>
+</body>
+</html>

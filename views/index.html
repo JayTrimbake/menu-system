@@ -1,1 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #fee440;
+        }
+        svg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+        }
 
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .out-top {
+            animation: rotate 20s linear infinite;
+            transform-origin: 13px 25px;
+        }
+        .in-top {
+            animation: rotate 10s linear infinite;
+            transform-origin: 13px 25px;
+        }
+        .out-bottom {
+            animation: rotate 25s linear infinite;
+            transform-origin: 84px 93px;
+        }
+        .in-bottom {
+            animation: rotate 15s linear infinite;
+            transform-origin: 84px 93px;
+        }
+
+        .product-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem; /* Add margin-top to create space above the logo */
+            margin-bottom: 2rem;
+        }
+
+        .logo-container img {
+            max-width: 300px; /* Increase the max-width to make the logo bigger */
+        }
+
+        .category-scroll {
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- SVG Animation Background -->
+    <svg preserveAspectRatio="xMidYMid slice" viewBox="10 10 80 80">
+        <defs>
+            <style>
+                .out-top {
+                    animation: rotate 20s linear infinite;
+                    transform-origin: 13px 25px;
+                }
+                .in-top {
+                    animation: rotate 10s linear infinite;
+                    transform-origin: 13px 25px;
+                }
+                .out-bottom {
+                    animation: rotate 25s linear infinite;
+                    transform-origin: 84px 93px;
+                }
+                .in-bottom {
+                    animation: rotate 15s linear infinite;
+                    transform-origin: 84px 93px;
+                }
+            </style>
+        </defs>
+        <path fill="#9b5de5" class="out-top" d="M37-5C25.1-14.7,5.7-19.1-9.2-10-28.5,1.8-32.7,31.1-19.8,49c15.5,21.5,52.6,22,67.2,2.3C59.4,35,53.7,8.5,37-5Z"/>
+        <path fill="#f15bb5" class="in-top" d="M20.6,4.1C11.6,1.5-1.9,2.5-8,11.2-16.3,23.1-8.2,45.6,7.4,50S42.1,38.9,41,24.5C40.2,14.1,29.4,6.6,20.6,4.1Z"/>
+        <path fill="#00bbf9" class="out-bottom" d="M105.9,48.6c-12.4-8.2-29.3-4.8-39.4.8-23.4,12.8-37.7,51.9-19.1,74.1s63.9,15.3,76-5.6c7.6-13.3,1.8-31.1-2.3-43.8C117.6,63.3,114.7,54.3,105.9,48.6Z"/>
+        <path fill="#00f5d4" class="in-bottom" d="M102,67.1c-9.6-6.1-22-3.1-29.5,2-15.4,10.7-19.6,37.5-7.6,47.8s35.9,3.9,44.5-12.5C115.5,92.6,113.9,74.6,102,67.1Z"/>
+    </svg>
+
+    <!-- Logo Container -->
+    <div class="logo-container">
+        <img src="images/logo.png" alt="Logo">
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-10 text-white">Our Products</h1>
+        <div id="category-nav" class="category-scroll gap-4 mb-6 p-2">
+            <!-- Category buttons will be inserted here -->
+        </div>
+        <div id="products-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/categories')
+                .then(response => response.json())
+                .then(data => {
+                    const navContainer = document.getElementById('category-nav');
+                    const productsContainer = document.getElementById('products-container');
+
+                    data.categories.forEach((category, index) => {
+                        const categoryButton = document.createElement('button');
+                        categoryButton.textContent = category.name;
+                        categoryButton.className = 'px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-800 transition duration-300 whitespace-nowrap';
+                        categoryButton.onclick = () => {
+                            productsContainer.innerHTML = '';
+                            category.items.forEach(item => {
+                                const productCard = document.createElement('div');
+                                productCard.className = 'bg-white shadow-lg rounded overflow-hidden product-card';
+
+                                const img = document.createElement('img');
+                                img.src = item.image;
+                                img.alt = item.name;
+                                img.className = 'w-full h-48 object-cover';
+
+                                const title = document.createElement('h3');
+                                title.textContent = item.name;
+                                title.className = 'text-xl font-semibold p-4';
+
+                                const price = document.createElement('p');
+                                price.textContent = `₹${item.price.toFixed(2)}`;
+                                price.className = 'text-lg font-bold text-green-700 px-4 py-2';
+
+                                productCard.appendChild(img);
+                                productCard.appendChild(title);
+                                productCard.appendChild(price);
+
+                                productsContainer.appendChild(productCard);
+                            });
+                        };
+                        navContainer.appendChild(categoryButton);
+                        if (index === 0) {
+                            categoryButton.click();  // Automatically click the first category button
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Failed to fetch categories:', error);
+                });
+        });
+    </script>
+</body>
+</html>
