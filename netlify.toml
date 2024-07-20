@@ -1,6 +1,6 @@
 [build]
   publish = "views"
-  functions = "app.js"
+  functions = "functions"
   command = "npm install"
 
 [[redirects]]
