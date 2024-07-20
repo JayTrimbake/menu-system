@@ -1,0 +1,9 @@
+[build]
+  publish = "views"
+  functions = "app.js"
+  command = "npm install"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
